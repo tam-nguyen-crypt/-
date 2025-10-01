@@ -21,6 +21,9 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             margin-bottom: 20px;
         }
+        h1 { color: #1a202c; font-size: 28px; margin-bottom: 8px; }
+        h2 { color: #2d3748; font-size: 22px; margin-bottom: 16px; }
+        .header-info { color: #718096; font-size: 14px; margin-top: 8px; }
         .header-flex {
             display: flex;
             justify-content: space-between;
@@ -35,9 +38,16 @@
             max-width: 200px;
             object-fit: contain;
         }
-        h1 { color: #1a202c; font-size: 28px; margin-bottom: 8px; }
-        h2 { color: #2d3748; font-size: 22px; margin-bottom: 16px; }
-        .header-info { color: #718096; font-size: 14px; margin-top: 8px; }
+        .sync-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .sync-active { background: #c6f6d5; color: #22543d; }
+        .sync-error { background: #fed7d7; color: #c53030; }
         
         /* グラフエリア改善 */
         .charts-grid {
@@ -185,24 +195,6 @@
             color: #718096;
             line-height: 1.6;
         }
-        .property-actions {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8f0;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status-未着手 { background: #bee3f8; color: #2c5282; }
-        .status-作図中 { background: #fef5e7; color: #975a16; }
-        .status-確認中 { background: #e9d8fd; color: #553c9a; }
-        .status-修正中 { background: #fed7d7; color: #c53030; }
-        .status-完了 { background: #c6f6d5; color: #22543d; }
         
         @media (max-width: 1200px) {
             .charts-grid { grid-template-columns: 1fr; }
@@ -220,7 +212,9 @@
         <div class="card">
             <div class="header-flex">
                 <div>
-                    <h1>📊 作図担当表管理システム</h1>
+                    <h1>📊 作図担当表管理システム
+                        <span id="syncStatus" class="sync-status sync-active">✓ 同期中</span>
+                    </h1>
                     <p class="header-info">最終更新: <span id="lastUpdate"></span></p>
                 </div>
                 <div class="logo-container">
@@ -275,10 +269,9 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="min-width:100px">得意先</th>
+                            <th style="min-width:200px">得意先</th>
                             <th style="min-width:300px">現場名</th>
                             <th style="min-width:150px">工種</th>
-                            <th style="min-width:100px">内容</th>
                             <th style="min-width:100px">技術担当</th>
                             <th style="min-width:100px">作図担当</th>
                             <th style="min-width:100px">状況</th>
@@ -324,37 +317,75 @@
 
     <script>
         const TYPES = ['山留(建築・土木)', '構台(建築・土木)', 'オーバーブリッジ', '橋梁', '施工図', 'BIMモデリング'];
-        const CONTENTS = ['新規作成', '簡易的修正'];
         const TECH_STAFF = ['野原', '町田', '澤辺', 'TAM', '廣澤', '工藤', '高橋'];
         const DRAWER_STAFF = ['高田', '松原', 'PHU', '桜庭'];
         const STATUSES = ['未着手', '作図中', '確認中', '修正中', '完了'];
+        
+        const STORAGE_KEY = 'drawingProjects_shared';
+        const COMPLETED_KEY = 'completedProjects_shared';
+        const SYNC_INTERVAL = 3000; // 3秒ごとに同期
         
         let projects = [];
         let completedProjects = [];
         let workloadChart = null;
         let statusChart = null;
+        let lastSyncTime = 0;
 
         function loadData() {
-            const saved = localStorage.getItem('drawingProjects');
-            const savedCompleted = localStorage.getItem('completedProjects');
+            const saved = localStorage.getItem(STORAGE_KEY);
+            const savedCompleted = localStorage.getItem(COMPLETED_KEY);
             projects = saved ? JSON.parse(saved) : [
-                { id: Date.now(), client: '', site: '', type: '', content: '', tech: '', drawer: '', status: '未着手', reserveDate: '', startDate: '', dueDate: '', drawingTime: '', drawingTimeUnit: 'day', note: '' }
+                { id: Date.now(), client: '', site: '', type: '', tech: '', drawer: '', status: '未着手', reserveDate: '', startDate: '', dueDate: '', drawingTime: '', drawingTimeUnit: 'day', note: '' }
             ];
             completedProjects = savedCompleted ? JSON.parse(savedCompleted) : [];
             
-            // 1時間経過した完了案件を自動削除
             autoDeleteCompletedProjects();
         }
 
         function saveData() {
-            localStorage.setItem('drawingProjects', JSON.stringify(projects));
-            localStorage.setItem('completedProjects', JSON.stringify(completedProjects));
+            const now = Date.now();
+            lastSyncTime = now;
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+            localStorage.setItem(COMPLETED_KEY, JSON.stringify(completedProjects));
+            localStorage.setItem('lastSync', now.toString());
+            
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ja-JP');
+            updateSyncStatus(true);
+        }
+
+        function syncData() {
+            try {
+                const lastSync = parseInt(localStorage.getItem('lastSync') || '0');
+                
+                if (lastSync > lastSyncTime) {
+                    // 他のユーザーが更新した
+                    loadData();
+                    render();
+                    console.log('データを同期しました');
+                }
+                
+                updateSyncStatus(true);
+            } catch (error) {
+                console.error('同期エラー:', error);
+                updateSyncStatus(false);
+            }
+        }
+
+        function updateSyncStatus(success) {
+            const statusEl = document.getElementById('syncStatus');
+            if (success) {
+                statusEl.className = 'sync-status sync-active';
+                statusEl.textContent = '✓ 同期中';
+            } else {
+                statusEl.className = 'sync-status sync-error';
+                statusEl.textContent = '⚠ 同期エラー';
+            }
         }
 
         function autoDeleteCompletedProjects() {
             const now = Date.now();
-            const oneHour = 60 * 60 * 1000; // 1時間をミリ秒で
+            const oneHour = 60 * 60 * 1000;
             
             completedProjects = completedProjects.filter(p => {
                 const completedTime = new Date(p.completedDate + ' ' + (p.completedTime || '00:00:00')).getTime();
@@ -367,7 +398,7 @@
         function addProject() {
             projects.push({
                 id: Date.now(),
-                client: '', site: '', type: '', content: '', tech: '', drawer: '',
+                client: '', site: '', type: '', tech: '', drawer: '',
                 status: '未着手', reserveDate: '', startDate: '', dueDate: '', drawingTime: '', drawingTimeUnit: 'day', note: ''
             });
             saveData();
@@ -398,10 +429,8 @@
         function updateProject(id, field, value) {
             const project = projects.find(p => p.id === id);
             if (project) {
-                const oldStatus = project.status;
                 project[field] = value;
                 
-                // 完了に変更された場合、完了一覧に移動
                 if (field === 'status' && value === '完了') {
                     const now = new Date();
                     project.completedDate = now.toISOString().split('T')[0];
@@ -418,7 +447,7 @@
         function renderProjects() {
             const tbody = document.getElementById('projectsBody');
             if (projects.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:30px;color:#718096;">進行中の案件がありません</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:30px;color:#718096;">進行中の案件がありません</td></tr>';
                 return;
             }
             
@@ -430,12 +459,6 @@
                         <select onchange="updateProject(${p.id}, 'type', this.value)">
                             <option value="">選択</option>
                             ${TYPES.map(t => `<option value="${t}" ${p.type === t ? 'selected' : ''}>${t}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td>
-                        <select onchange="updateProject(${p.id}, 'content', this.value)">
-                            <option value="">選択</option>
-                            ${CONTENTS.map(c => `<option value="${c}" ${p.content === c ? 'selected' : ''}>${c}</option>`).join('')}
                         </select>
                     </td>
                     <td>
@@ -513,7 +536,6 @@
                                     <thead>
                                         <tr style="background:#f7fafc;">
                                             <th style="padding:10px;border:1px solid #e2e8f0;">工種</th>
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">内容</th>
                                             <th style="padding:10px;border:1px solid #e2e8f0;">技術担当</th>
                                             <th style="padding:10px;border:1px solid #e2e8f0;">作図担当</th>
                                             <th style="padding:10px;border:1px solid #e2e8f0;">作図用時間</th>
@@ -525,7 +547,6 @@
                                     <tbody>
                                         <tr>
                                             <td style="padding:10px;border:1px solid #e2e8f0;"><strong>${p.type || '工種未設定'}</strong></td>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;">${p.content || '内容未設定'}</td>
                                             <td style="padding:10px;border:1px solid #e2e8f0;">${p.tech || 'なし'}</td>
                                             <td style="padding:10px;border:1px solid #e2e8f0;">${p.drawer || 'なし'}</td>
                                             <td style="padding:10px;border:1px solid #e2e8f0;">${p.drawingTime ? p.drawingTime + (p.drawingTimeUnit === 'hour' ? '時間' : '日') : '-'}</td>
@@ -649,16 +670,25 @@
             updateStats();
         }
 
+        // 初期化
         window.addEventListener('load', function() {
             loadData();
             saveData();
             render();
+            
+            // 定期的にデータを同期（3秒ごと）
+            setInterval(syncData, SYNC_INTERVAL);
             
             // 1分ごとに自動削除をチェック
             setInterval(function() {
                 autoDeleteCompletedProjects();
                 render();
             }, 60000);
+            
+            // ページを離れる前に保存
+            window.addEventListener('beforeunload', function() {
+                saveData();
+            });
         });
     </script>
 </body>
