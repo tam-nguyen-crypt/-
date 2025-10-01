@@ -30,56 +30,36 @@
             align-items: center;
             gap: 20px;
         }
-        .logo-container {
-            flex-shrink: 0;
-        }
+        .logo-container { flex-shrink: 0; }
         .logo-img {
             height: 60px;
             max-width: 200px;
             object-fit: contain;
         }
-        .sync-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        .sync-active { background: #c6f6d5; color: #22543d; }
-        .sync-error { background: #fed7d7; color: #c53030; }
-        
-        /* グラフエリア改善 */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .chart-card {
-            background: #f7fafc;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #e2e8f0;
-        }
-        .chart-title {
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
             font-size: 16px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
         }
-        .chart-wrapper { 
-            height: 280px; 
-            position: relative;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(72, 187, 120, 0.6);
+        }
+        .save-btn:active {
+            transform: scale(0.95);
         }
         
-        /* 統計カード */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -93,32 +73,31 @@
             border-radius: 10px;
             text-align: center;
         }
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .stat-value { font-size: 32px; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { font-size: 14px; opacity: 0.9; }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.9;
+        .chart-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
         }
+        .chart-title { font-size: 16px; font-weight: 600; color: #2d3748; margin-bottom: 15px; }
+        .chart-wrapper { height: 280px; position: relative; background: white; padding: 15px; border-radius: 8px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th, td { padding: 12px; text-align: left; border: 1px solid #e2e8f0; }
         th { background: #f7fafc; font-weight: 600; color: #2d3748; }
         tr:hover { background: #f7fafc; }
-        input, select { 
-            width: 100%; 
-            padding: 8px; 
-            border: 1px solid #cbd5e0; 
-            border-radius: 6px; 
-            font-size: 14px;
-        }
-        input:focus, select:focus { 
-            outline: none; 
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+        input, select { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        
         .btn {
             padding: 12px 24px;
             border: none;
@@ -154,17 +133,13 @@
             margin-bottom: 20px;
         }
         
-        /* 物件一覧 */
-        .property-list { 
-            max-height: 500px; 
-            overflow-y: auto;
-        }
+        .property-list { max-height: 500px; overflow-y: auto; }
         .property-item {
             background: #f7fafc;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 12px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #48bb78;
             transition: all 0.2s;
         }
         .property-item:hover {
@@ -177,23 +152,24 @@
             align-items: center;
             margin-bottom: 8px;
         }
-        .property-title {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 16px;
-        }
-        .property-badge {
-            background: #667eea;
+        .property-title { font-weight: 600; color: #2d3748; font-size: 16px; }
+        .property-badge { background: #667eea; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
             color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
         }
-        .property-detail {
-            font-size: 13px;
-            color: #718096;
-            line-height: 1.6;
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
         @media (max-width: 1200px) {
@@ -212,10 +188,11 @@
         <div class="card">
             <div class="header-flex">
                 <div>
-                    <h1>📊 作図担当表管理システム
-                        <span id="syncStatus" class="sync-status sync-active">✓ 同期中</span>
-                    </h1>
+                    <h1>📊 作図担当表管理システム</h1>
                     <p class="header-info">最終更新: <span id="lastUpdate"></span></p>
+                    <p class="header-info" style="color:#48bb78;font-weight:600;margin-top:5px;">
+                        💾 自動保存ON - 編集すると自動的に保存されます
+                    </p>
                 </div>
                 <div class="logo-container">
                     <img class="logo-img" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgNjAiPgo8cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzAwNjZjYyIvPgo8dGV4dCB4PSI2MCIgeT0iNDAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIzMCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzMiPuODkuODreOCuzwvdGV4dD4KPC9zdmc+" alt="ヒロセ株式会社" onerror="this.style.display='none'">
@@ -223,7 +200,6 @@
             </div>
         </div>
 
-        <!-- 統計サマリー -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="totalProjects">0</div>
@@ -243,7 +219,6 @@
             </div>
         </div>
 
-        <!-- グラフエリア -->
         <div class="charts-grid">
             <div class="chart-card">
                 <div class="chart-title">👥 作図担当者別 負荷状況</div>
@@ -259,7 +234,6 @@
             </div>
         </div>
 
-        <!-- 進行中の案件一覧 -->
         <div class="card">
             <div class="toolbar">
                 <h2>📝 進行中の案件一覧</h2>
@@ -288,13 +262,11 @@
             </div>
         </div>
 
-        <!-- 完了一覧（完了案件） -->
         <div class="card">
             <h2>✅ 完了一覧（1時間後に自動削除）</h2>
             <div class="property-list" id="completedList"></div>
         </div>
 
-        <!-- 負荷状況テーブル -->
         <div class="card">
             <h2>📈 作図担当者の詳細負荷状況</h2>
             <table id="workloadTable">
@@ -312,8 +284,9 @@
                 <tbody id="workloadBody"></tbody>
             </table>
         </div>
-
     </div>
+
+    <button class="save-btn" onclick="manualSave()">💾 今すぐ保存</button>
 
     <script>
         const TYPES = ['山留(建築・土木)', '構台(建築・土木)', 'オーバーブリッジ', '橋梁', '施工図', 'BIMモデリング'];
@@ -321,19 +294,14 @@
         const DRAWER_STAFF = ['高田', '松原', 'PHU', '桜庭'];
         const STATUSES = ['未着手', '作図中', '確認中', '修正中', '完了'];
         
-        const STORAGE_KEY = 'drawingProjects_shared';
-        const COMPLETED_KEY = 'completedProjects_shared';
-        const SYNC_INTERVAL = 3000; // 3秒ごとに同期
-        
         let projects = [];
         let completedProjects = [];
         let workloadChart = null;
         let statusChart = null;
-        let lastSyncTime = 0;
 
         function loadData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            const savedCompleted = localStorage.getItem(COMPLETED_KEY);
+            const saved = localStorage.getItem('drawingProjects');
+            const savedCompleted = localStorage.getItem('completedProjects');
             projects = saved ? JSON.parse(saved) : [
                 { id: Date.now(), client: '', site: '', type: '', tech: '', drawer: '', status: '未着手', reserveDate: '', startDate: '', dueDate: '', drawingTime: '', drawingTimeUnit: 'day', note: '' }
             ];
@@ -343,44 +311,25 @@
         }
 
         function saveData() {
-            const now = Date.now();
-            lastSyncTime = now;
-            
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-            localStorage.setItem(COMPLETED_KEY, JSON.stringify(completedProjects));
-            localStorage.setItem('lastSync', now.toString());
-            
+            localStorage.setItem('drawingProjects', JSON.stringify(projects));
+            localStorage.setItem('completedProjects', JSON.stringify(completedProjects));
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ja-JP');
-            updateSyncStatus(true);
         }
 
-        function syncData() {
-            try {
-                const lastSync = parseInt(localStorage.getItem('lastSync') || '0');
-                
-                if (lastSync > lastSyncTime) {
-                    // 他のユーザーが更新した
-                    loadData();
-                    render();
-                    console.log('データを同期しました');
-                }
-                
-                updateSyncStatus(true);
-            } catch (error) {
-                console.error('同期エラー:', error);
-                updateSyncStatus(false);
-            }
+        function manualSave() {
+            saveData();
+            showNotification('💾 保存しました！');
         }
 
-        function updateSyncStatus(success) {
-            const statusEl = document.getElementById('syncStatus');
-            if (success) {
-                statusEl.className = 'sync-status sync-active';
-                statusEl.textContent = '✓ 同期中';
-            } else {
-                statusEl.className = 'sync-status sync-error';
-                statusEl.textContent = '⚠ 同期エラー';
-            }
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
         }
 
         function autoDeleteCompletedProjects() {
@@ -403,6 +352,7 @@
             });
             saveData();
             render();
+            showNotification('✅ 案件を追加しました');
         }
 
         function deleteProject(id) {
@@ -410,6 +360,7 @@
                 projects = projects.filter(p => p.id !== id);
                 saveData();
                 render();
+                showNotification('🗑️ 案件を削除しました');
             }
         }
 
@@ -423,6 +374,7 @@
                 completedProjects = completedProjects.filter(p => p.id !== id);
                 saveData();
                 render();
+                showNotification('↩️ 案件を復元しました');
             }
         }
 
@@ -437,6 +389,7 @@
                     project.completedTime = now.toTimeString().split(' ')[0];
                     completedProjects.unshift(project);
                     projects = projects.filter(p => p.id !== id);
+                    showNotification('✅ 案件を完了しました');
                 }
                 
                 saveData();
@@ -521,7 +474,7 @@
                     const remainingMin = Math.max(0, Math.floor(remainingMs / 60000));
                     
                     return `
-                        <div class="property-item" style="border-left-color: #48bb78;">
+                        <div class="property-item">
                             <div class="property-header">
                                 <div class="property-title">
                                     <span style="display:inline-block;background:#48bb78;color:white;padding:4px 12px;border-radius:50%;font-weight:bold;margin-right:12px;min-width:40px;text-align:center;">${index + 1}</span>
@@ -531,36 +484,14 @@
                                     ${remainingMin}分後に削除
                                 </div>
                             </div>
-                            <div class="property-detail">
-                                <table style="width:100%;margin-top:12px;background:white;border-radius:8px;overflow:hidden;">
-                                    <thead>
-                                        <tr style="background:#f7fafc;">
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">工種</th>
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">技術担当</th>
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">作図担当</th>
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">作図用時間</th>
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">完了日時</th>
-                                            <th style="padding:10px;border:1px solid #e2e8f0;">備考</th>
-                                            <th style="padding:10px;text-align:center;border:1px solid #e2e8f0;">操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;"><strong>${p.type || '工種未設定'}</strong></td>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;">${p.tech || 'なし'}</td>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;">${p.drawer || 'なし'}</td>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;">${p.drawingTime ? p.drawingTime + (p.drawingTimeUnit === 'hour' ? '時間' : '日') : '-'}</td>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;">${p.completedDate || '不明'} ${p.completedTime || ''}</td>
-                                            <td style="padding:10px;border:1px solid #e2e8f0;font-size:13px;">${p.note || '-'}</td>
-                                            <td style="padding:10px;text-align:center;border:1px solid #e2e8f0;">
-                                                <button class="btn btn-restore" onclick="restoreProject(${p.id})" style="font-size:12px;padding:4px 10px;">
-                                                    復元
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <p style="margin-top:10px;color:#718096;">
+                                工種: <strong>${p.type || '-'}</strong> | 
+                                技術: ${p.tech || '-'} | 
+                                作図: ${p.drawer || '-'} | 
+                                作図時間: ${p.drawingTime ? p.drawingTime + (p.drawingTimeUnit === 'hour' ? '時間' : '日') : '-'} | 
+                                完了: ${p.completedDate} ${p.completedTime}
+                            </p>
+                            <button class="btn btn-restore" style="margin-top:10px;" onclick="restoreProject(${p.id})">復元</button>
                         </div>
                     `}).join('');
             }
@@ -631,9 +562,7 @@
                         x: { stacked: true },
                         y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
                     },
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
 
@@ -644,23 +573,23 @@
                 count: projects.filter(p => p.status === status).length
             })).filter(s => s.count > 0);
             
-            statusChart = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: statusCounts.map(s => s.status),
-                    datasets: [{
-                        data: statusCounts.map(s => s.count),
-                        backgroundColor: ['#3B82F6', '#FBBF24', '#A78BFA', '#FB923C']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
+            if (statusCounts.length > 0) {
+                statusChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusCounts.map(s => s.status),
+                        datasets: [{
+                            data: statusCounts.map(s => s.count),
+                            backgroundColor: ['#3B82F6', '#FBBF24', '#A78BFA', '#FB923C']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
                     }
-                }
-            });
+                });
+            }
         }
 
         function render() {
@@ -670,35 +599,20 @@
             updateStats();
         }
 
-        // 初期化
         window.addEventListener('load', function() {
             loadData();
             saveData();
             render();
             
-            // 定期的にデータを同期（3秒ごと）
-            setInterval(syncData, SYNC_INTERVAL);
-            
-            // 1分ごとに自動削除をチェック
             setInterval(function() {
                 autoDeleteCompletedProjects();
                 render();
             }, 60000);
             
-            // ページを離れる前に保存
             window.addEventListener('beforeunload', function() {
                 saveData();
             });
         });
     </script>
-    const firebaseConfig = {
-  apiKey: "AIzaSyDqtpoIO_fI9aB7JyMq0TJZ4cjo35W0bDk",
-  authDomain: "zumenkanri-6df55.firebaseapp.com",
-  projectId: "zumenkanri-6df55",
-  storageBucket: "zumenkanri-6df55.firebasestorage.app",
-  messagingSenderId: "695371803971",
-  appId: "1:695371803971:web:06956b968f012ab64153f6",
-  measurementId: "G-HM4HKHK7ER"
-};
 </body>
 </html>
